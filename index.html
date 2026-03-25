@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wolf Labs | A2 Node 01: Past Memories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;700;800;900&family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        spotify: '#1DB954',
+                        spotifyHover: '#1ed760',
+                        base: '#050505',
+                        surface: '#121212',
+                        subtext: '#A1A1AA',
+                        error: '#E50914'
+                    },
+                    fontFamily: {
+                        header: ['Montserrat', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #050505; color: #FFFFFF; overflow-x: hidden; user-select: none; font-family: 'Inter', sans-serif; }
+        
+        /* Premium Panels */
+        .glass-panel { background: #121212; border: 1px solid rgba(255, 255, 255, 0.08); border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); position: relative; overflow: hidden; }
+        .glass-panel-visible { background: #121212; border: 1px solid rgba(255, 255, 255, 0.08); border-top: 1px solid rgba(255, 255, 255, 0.12); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); position: relative; overflow: visible; }
+        
+        /* High Contrast Buttons - NO BLACK TEXT ALLOWED */
+        .btn-primary { background-color: #1DB954; color: #FFFFFF !important; border-radius: 9999px; font-weight: 800; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s; box-shadow: 0 4px 20px rgba(29,185,84,0.25); border: none; }
+        .btn-primary:hover:not(:disabled) { background-color: #1ed760; transform: translateY(-2px); box-shadow: 0 6px 25px rgba(29,185,84,0.4); color: #FFFFFF; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; background-color: #262626; color: #71717A; box-shadow: none; }
+        
+        .btn-secondary { background-color: transparent; color: #FFFFFF; border: 1px solid #555; border-radius: 9999px; font-weight: 700; text-transform: uppercase; transition: all 0.3s; font-family: 'Montserrat', sans-serif; letter-spacing: 0.05em; }
+        .btn-secondary:hover:not(:disabled) { border-color: #FFFFFF; background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        
+        .btn-outline { background-color: transparent; color: #1DB954; border: 2px solid #1DB954; border-radius: 9999px; font-weight: 800; font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s; color: #FFFFFF;}
+        .btn-outline:hover:not(:disabled) { background: rgba(29,185,84,0.1); transform: translateY(-2px); }
+
+        /* Progress Bar */
+        .bar-container { width: 100%; height: 6px; background: #262626; border-radius: 999px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 999px; background-color: #1DB954; }
+        
+        /* Ambient Orbs */
+        .bg-orb { position: fixed; border-radius: 50%; filter: blur(140px); z-index: 0; pointer-events: none; animation: float 20s infinite ease-in-out alternate; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -40px) scale(1.1); } }
+        
+        /* Interactive Elements */
+        .word-chip { display: inline-flex; align-items: center; padding: 14px 24px; margin: 6px; background: #1A1A1A; border: 1px solid #333; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1.1rem; transition: all 0.2s; color: #FFFFFF !important; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .word-chip:hover { background: #262626; border-color: #1DB954; transform: translateY(-2px); }
+        .word-chip.selected { background: rgba(29, 185, 84, 0.1); border-color: #1DB954; color: #1DB954 !important; box-shadow: none; transform: translateY(0); }
+        
+        .drop-zone { min-height: 100px; border: 2px dashed rgba(255,255,255,0.15); border-radius: 20px; padding: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); transition: all 0.3s; }
+        
+        /* Bug Hunter Custom */
+        .bh-word { cursor: pointer; transition: all 0.2s; border-bottom: 3px dashed #444; padding-bottom: 4px; color: #FFFFFF; font-family: 'Playfair Display', serif; }
+        .bh-word:hover { border-bottom-color: #1DB954; color: #1DB954; }
+
+        /* 3D Flashcards Styles */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        /* Animations */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        .animate-error { animation: shake 0.4s ease-in-out; border-color: #E50914 !important; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-up { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        
+        /* Slider */
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #333; border-radius: 5px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; border-radius: 50%; background: #1DB954; cursor: pointer; border: 4px solid #050505; box-shadow: 0 0 15px rgba(29,185,84,0.5); transition: transform 0.1s; }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Ambient Orbs -->
+    <div class="bg-orb w-[500px] h-[500px] bg-spotify/10 top-[-10%] left-[-10%]"></div>
+    <div class="bg-orb w-[700px] h-[700px] bg-blue-500/5 bottom-[-20%] right-[-10%]" style="animation-delay: -5s;"></div>
+
+    <!-- HUD Header -->
+    <header class="fixed top-0 w-full z-40 bg-[#050505]/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex justify-between items-center transition-all">
+        <div class="flex items-center gap-4">
+            <div class="text-white font-header font-black text-2xl tracking-tight uppercase flex items-center">
+                <i class="fa-solid fa-bolt text-spotify mr-3 text-xl"></i> Wolf Labs <span class="text-subtext font-normal ml-3 text-sm tracking-widest hidden md:inline">A2 Node 01</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-1 items-end w-1/3 max-w-[200px]">
+            <div class="flex justify-between w-full text-[10px] font-header text-subtext font-bold uppercase tracking-widest">
+                <span>Fluency</span><span id="xp-text" class="text-spotify">0 XP</span>
+            </div>
+            <div class="bar-container w-full"><div id="xp-bar" class="bar-fill" style="width: 0%;"></div></div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-32 pb-28 px-4 flex flex-col items-center justify-center relative z-10 w-full max-w-6xl mx-auto min-h-[calc(100vh-160px)]" id="slide-container"></main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 w-full z-40 bg-[#050505]/90 backdrop-blur-xl border-t border-white/5 p-5 flex justify-between items-center px-6">
+        <div class="text-sm font-header text-subtext tracking-widest font-bold uppercase flex items-center">
+            PAST MEMORIES <span class="text-white mx-4 opacity-20">|</span> <span id="slide-counter" class="text-white">01/35</span>
+        </div>
+        <div class="flex gap-4 items-center">
+            <button id="btn-prev" onclick="prevSlide()" class="btn-secondary px-6 py-3 text-sm flex items-center"><i class="fa-solid fa-chevron-left mr-2"></i> Back</button>
+            <button onclick="nextSlide()" class="text-spotify hover:text-white transition-all text-xs font-bold uppercase tracking-widest px-4 py-2 flex items-center gap-2">Skip <i class="fa-solid fa-forward-step"></i></button>
+        </div>
+    </footer>
+
+    <!-- Modal Form -->
+    <div id="custom-modal" class="fixed inset-0 z-[60] flex items-center justify-center hidden bg-black/80 backdrop-blur-md">
+        <div class="glass-panel p-12 max-w-sm w-full mx-4 text-center transform scale-95 transition-transform duration-300 border-t-4 border-spotify" id="modal-box">
+            <div id="modal-icon" class="text-6xl mb-6 relative z-10 text-spotify"></div>
+            <h3 id="modal-title" class="font-header text-2xl font-black mb-3 tracking-tight relative z-10 text-white"></h3>
+            <p id="modal-text" class="text-subtext mb-8 text-lg leading-relaxed relative z-10"></p>
+            <button onclick="closeModal()" id="modal-btn" class="btn-primary w-full py-4 text-sm tracking-widest relative z-10 shadow-lg">CONTINUE</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- DATA & STATE --- */
+        const escapeHTML = (str) => {
+            if (!str || typeof str !== 'string') return str;
+            return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        };
+
+        let state = { xp: 0, current: 0, builderTarget: "" };
+        const TOTAL_XP = 2500;
+
+        /* --- UI UTILS --- */
+        function updateHUD() {
+            document.getElementById('xp-bar').style.width = `${Math.min(100, (state.xp / TOTAL_XP) * 100)}%`;
+            document.getElementById('xp-text').innerText = `${state.xp} XP`;
+            document.getElementById('slide-counter').innerText = `${String(state.current + 1).padStart(2, '0')}/${slides.length}`;
+            document.getElementById('btn-prev').disabled = state.current === 0;
+        }
+
+        function gainXP(amount, message = "Correct!") {
+            state.xp += amount; updateHUD();
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-32 left-1/2 transform -translate-x-1/2 text-white font-black text-2xl z-[100] animate-bounce text-center drop-shadow-[0_0_15px_rgba(29,185,84,0.6)]';
+            toast.innerHTML = `+${amount} XP<br><span class="text-xs text-spotify uppercase tracking-widest">${message}</span>`;
+            document.body.appendChild(toast); setTimeout(() => toast.remove(), 1500);
+        }
+
+        function takeDamage(reason = "Incorrect") {
+            const container = document.getElementById('slide-container');
+            container.classList.add('animate-error');
+            setTimeout(() => container.classList.remove('animate-error'), 400);
+            
+            const box = document.getElementById('modal-box');
+            box.classList.replace('border-spotify', 'border-error');
+            document.getElementById('modal-title').innerText = 'FOCUS LOST';
+            document.getElementById('modal-text').innerText = reason;
+            document.getElementById('modal-icon').innerHTML = `<i class="fa-solid fa-circle-xmark text-error"></i>`;
+            document.getElementById('custom-modal').classList.remove('hidden');
+            setTimeout(() => { box.classList.remove('scale-95'); box.classList.add('scale-100'); }, 10);
+        }
+
+        function closeModal() {
+            const box = document.getElementById('modal-box');
+            box.classList.remove('scale-100'); box.classList.add('scale-95');
+            setTimeout(() => { 
+                document.getElementById('custom-modal').classList.add('hidden'); 
+                box.classList.replace('border-error', 'border-spotify'); // reset
+            }, 200);
+        }
+
+        function revealContinue(id) {
+            const btn = document.getElementById(`next-btn-${id}`);
+            if(btn) {
+                btn.classList.remove('hidden');
+                btn.classList.add('animate-slide-up');
+            }
+        }
+
+        function renderSlide() {
+            const container = document.getElementById('slide-container');
+            const slide = slides[state.current];
+            container.style.opacity = 0;
+            
+            setTimeout(() => {
+                container.innerHTML = slide.render();
+                if(slide.onRender) slide.onRender();
+                container.style.opacity = 1;
+                updateHUD();
+            }, 200);
+        }
+
+        function nextSlide() { if (state.current < slides.length - 1) { state.current++; renderSlide(); } }
+        function prevSlide() { if (state.current > 0) { state.current--; renderSlide(); } }
+
+        /* --- MECHANICS TEMPLATES (PREMIUM DESIGN) --- */
+        const Mechanics = {
+            Guide: (title, points) => ({ render: () => `
+                <div class="w-full glass-panel-visible p-10 md:p-14 relative border-t-4 border-spotify animate-slide-up mt-6">
+                    <div class="absolute -top-4 left-8 bg-[#121212] border-2 border-spotify text-white text-[11px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg z-20">Instructor Guide</div>
+                    <h1 class="text-3xl md:text-4xl font-header font-black mb-6 text-white tracking-tight relative z-10">${title}</h1>
+                    <div class="bg-[#282828]/80 backdrop-blur-sm rounded-2xl p-6 mb-8 relative z-10">
+                        <h3 class="text-white font-bold mb-4 uppercase text-xs tracking-widest opacity-50">Targets</h3>
+                        <ul class="space-y-4 text-base text-white font-medium">
+                            ${points.map(p => `<li class="flex items-start text-white"><i class="fa-solid fa-bullseye text-spotify mt-1 mr-3"></i> <span class="text-white drop-shadow-md">${p}</span></li>`).join('')}
+                        </ul>
+                    </div>
+                    <button class="btn-primary w-full py-5 text-lg shadow-lg text-white uppercase tracking-widest font-bold border-none" onclick="nextSlide()">I ACCEPT THE CHALLENGE <i class="fa-solid fa-check ml-2"></i></button>
+                </div>` }),
+
+            Cover: (title, subtitle) => ({ render: () => `
+                <div class="text-center space-y-8 animate-slide-up w-full max-w-3xl mx-auto">
+                    <div class="w-40 h-40 rounded-full bg-[#121212] mx-auto flex items-center justify-center border border-spotify/30 shadow-[0_0_60px_rgba(29,185,84,0.15)] relative group">
+                        <div class="absolute inset-0 rounded-full bg-spotify opacity-5 group-hover:opacity-20 transition-opacity duration-500"></div>
+                        <i class="fa-solid fa-plane-departure text-6xl text-white relative z-10 group-hover:-translate-y-2 group-hover:translate-x-2 transition-transform duration-500"></i>
+                    </div>
+                    <h1 class="text-6xl md:text-8xl font-header font-black leading-tight tracking-tighter text-white">${title}</h1>
+                    <p class="text-xl md:text-2xl text-white leading-relaxed font-medium">${subtitle}</p>
+                    <div class="pt-8">
+                        <button class="btn-primary px-14 py-5 text-lg shadow-[0_10px_30px_rgba(29,185,84,0.3)]" onclick="nextSlide()">BEGIN MISSION <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    </div>
+                </div>` }),
+
+            Speak: (id, q, s) => ({ render: () => `
+                <div class="w-full max-w-3xl text-center relative z-10 animate-slide-up mx-auto">
+                    <div class="w-24 h-24 rounded-full bg-spotify/10 border border-spotify/30 flex items-center justify-center mb-10 mx-auto shadow-[0_0_30px_rgba(29,185,84,0.2)]">
+                        <i class="fa-solid fa-microphone text-4xl text-white animate-pulse"></i>
+                    </div>
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-4">Speaking Checkpoint</h2>
+                    <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-10 leading-tight">"${q}"</h1>
+                    <div class="glass-panel p-8 text-left border-l-4 border-spotify bg-gradient-to-r from-spotify/5 to-transparent">
+                        <p class="text-[10px] uppercase text-white font-bold mb-3 tracking-widest opacity-80">Speaking Starter:</p>
+                        <p class="text-2xl text-white font-serif italic font-medium">"${s}"</p>
+                    </div>
+                    <button class="btn-primary mt-12 w-full md:w-auto px-12 py-5 text-lg shadow-lg mx-auto block" onclick="gainXP(100, 'Great speaking!'); nextSlide()">I SPOKE OUT LOUD <i class="fa-solid fa-check ml-2"></i></button>
+                </div>` }),
+                
+            Flashcards: (id, title, subtitle, cards) => ({ render: () => `
+                <div class="w-full max-w-6xl flex flex-col items-center relative z-10 animate-slide-up">
+                    <div class="text-center mb-10 max-w-2xl">
+                        <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-3"><i class="fa-solid fa-sparkles mr-2 text-white"></i> Discovery Phase</h2>
+                        <h1 class="text-4xl font-header font-black text-white tracking-tight">${title}</h1>
+                        <p class="text-xl text-white mt-4 leading-relaxed">${subtitle}</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-10">
+                        ${cards.map((c, i) => `
+                            <div class="group perspective-1000 w-full h-80 cursor-pointer" onclick="this.querySelector('.flip-inner').classList.toggle('rotate-y-180')">
+                                <div class="flip-inner relative w-full h-full transform-style-3d">
+                                    <!-- Front -->
+                                    <div class="absolute w-full h-full backface-hidden glass-panel flex flex-col items-center justify-center p-6 border-2 border-transparent group-hover:border-spotify/50 transition-colors">
+                                        <i class="fa-solid ${c.icon} text-6xl text-white mb-6 drop-shadow-lg"></i>
+                                        <h3 class="text-3xl font-serif font-bold text-white">${c.word}</h3>
+                                        <p class="text-xs text-white mt-4 uppercase tracking-widest flex items-center opacity-60"><i class="fa-solid fa-hand-pointer mr-2"></i> Tap to reveal</p>
+                                    </div>
+                                    <!-- Back -->
+                                    <div class="absolute w-full h-full backface-hidden rotate-y-180 glass-panel bg-[#1DB954] flex flex-col items-center justify-center p-8 text-center border-2 border-spotify shadow-xl">
+                                        <h3 class="text-4xl font-header font-black mb-4 text-white">${c.past}</h3>
+                                        <p class="text-lg font-bold text-white">${c.meaning}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-primary w-full md:w-auto px-14 py-5 text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>
+            `}),
+
+            PreWatch: (id, title, questions) => ({ render: () => `
+                <div class="w-full max-w-4xl text-center relative z-10 animate-slide-up mx-auto">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-10"><i class="fa-solid fa-brain mr-2 text-white"></i> Pre-Watch Analysis</h2>
+                    <h1 class="text-4xl font-header font-black text-white mb-10">${title}</h1>
+                    <div class="grid grid-cols-1 gap-6 mb-12 max-w-2xl mx-auto">
+                        ${questions.map((q, i) => `
+                            <div class="glass-panel p-6 font-bold text-xl text-white border-l-4 border-spotify flex items-center">
+                                <span class="bg-spotify/20 text-white rounded-full w-8 h-8 flex items-center justify-center mr-4 shrink-0">${i+1}</span>
+                                <span class="text-left">${q}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-primary px-14 py-5 text-lg shadow-lg" onclick="nextSlide()">READY TO WATCH <i class="fa-solid fa-play ml-2"></i></button>
+                </div>
+            `}),
+
+            Video: (title, ytId) => ({ render: () => `
+                <div class="w-full max-w-5xl space-y-6 animate-slide-up mx-auto relative z-10">
+                    <div class="flex items-center justify-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-spotify text-white rounded-xl flex items-center justify-center text-xl shadow-lg"><i class="fa-solid fa-video"></i></div>
+                        <h2 class="text-3xl font-header font-black tracking-tight text-white">${title}</h2>
+                    </div>
+                    <div class="glass-panel p-0 pt-[56.25%] bg-black shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative overflow-hidden rounded-2xl border border-white/10">
+                        <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div class="text-center mt-8">
+                        <button class="btn-primary px-14 py-5 text-lg shadow-lg" onclick="nextSlide()">FINISHED WATCHING <i class="fa-solid fa-check ml-2"></i></button>
+                    </div>
+                </div>
+            `}),
+
+            Dossier: (title, text) => ({ render: () => `
+                <div class="w-full max-w-4xl animate-slide-up mx-auto relative z-10">
+                    <div class="flex items-center gap-4 mb-8 justify-center">
+                        <i class="fa-solid fa-folder-open text-spotify text-3xl"></i>
+                        <h2 class="text-sm font-header text-white font-bold uppercase tracking-widest">Narrative Dossier</h2>
+                    </div>
+                    <div class="glass-panel p-12 md:p-16 relative border-l-8 border-spotify shadow-2xl bg-gradient-to-r from-spotify/5 to-transparent">
+                        <i class="fa-solid fa-earth-europe absolute right-10 top-10 text-8xl text-white/5 pointer-events-none"></i>
+                        <h1 class="text-5xl font-header font-black mb-8 text-white tracking-tight">${title}</h1>
+                        <p class="text-3xl text-white font-serif leading-relaxed italic border-l-4 border-white/10 pl-8">
+                            ${text}
+                        </p>
+                    </div>
+                    <div class="text-center mt-12">
+                        <button class="btn-primary px-14 py-5 text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    </div>
+                </div>
+            `}),
+
+            Grammar: (icon, title, rule, examples) => ({ render: () => `
+                <div class="w-full max-w-4xl animate-slide-up mx-auto relative z-10">
+                    <div class="flex flex-col items-center text-center mb-10">
+                        <div class="w-24 h-24 bg-spotify/10 border border-spotify/30 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(29,185,84,0.15)]">
+                            <i class="fa-solid ${icon} text-5xl text-white"></i>
+                        </div>
+                        <h1 class="text-5xl font-header font-black mb-6 tracking-tight text-white">${title}</h1>
+                        <div class="glass-panel p-8 text-2xl text-white font-medium leading-relaxed border-l-4 border-spotify bg-spotify/5">
+                            ${rule}
+                        </div>
+                    </div>
+                    <div class="space-y-4 w-full">
+                        ${examples.map(ex => `
+                            <div class="glass-panel p-8 flex flex-col md:flex-row justify-between items-center transition-all hover:bg-white/5 cursor-default border border-transparent hover:border-white/10">
+                                <span class="text-3xl font-serif font-bold italic text-white">${ex.en}</span>
+                                <span class="text-white text-sm uppercase font-black tracking-widest bg-black/50 px-4 py-2 rounded-full mt-4 md:mt-0 flex items-center"><i class="fa-solid fa-info-circle text-spotify mr-2"></i>${ex.desc}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="text-center mt-12">
+                        <button class="btn-primary px-14 py-5 text-lg shadow-lg" onclick="nextSlide()">I UNDERSTAND <i class="fa-solid fa-check ml-2"></i></button>
+                    </div>
+                </div>
+            `}),
+
+            Options: (id, question, options, correct) => ({ render: () => `
+                <div class="text-center w-full max-w-3xl relative z-10 mx-auto animate-slide-up">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-6"><i class="fa-solid fa-circle-question mr-2 text-white"></i> Select the truth</h2>
+                    <div class="text-3xl md:text-5xl font-serif font-bold text-white mb-12 leading-relaxed">"${question}"</div>
+                    <div class="grid grid-cols-1 gap-4" id="opts-${id}">
+                        ${options.map((opt, i) => `
+                            <button class="glass-panel p-6 rounded-2xl font-sans font-bold text-white text-xl hover:bg-[#1a1a1a] flex items-center gap-6 group transition-all border border-white/5 hover:border-spotify/50 hover:shadow-[0_0_20px_rgba(29,185,84,0.1)]" onclick="verifyOptions('${id}', '${escapeHTML(opt)}', '${escapeHTML(correct)}', this)">
+                                <div class="opt-circle w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center transition-colors group-hover:border-spotify flex-shrink-0"></div>
+                                <span class="text-left text-white">${opt}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button id="next-btn-${id}" class="btn-primary w-full mt-10 hidden py-5 px-12 mx-auto md:w-auto block text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>` }),
+
+            BugHunter: (id, sentence, bugIdx, fix) => ({ render: () => `
+                <div class="w-full max-w-4xl text-center relative z-10 mx-auto animate-slide-up">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-10"><i class="fa-solid fa-magnifying-glass-arrow-right mr-2 text-white text-lg"></i> Find the error</h2>
+                    <div class="glass-panel p-10 md:p-16 text-4xl md:text-5xl font-serif font-bold flex justify-center items-center flex-wrap gap-x-5 gap-y-8 leading-normal rounded-2xl shadow-2xl bg-[#0a0a0a]">
+                        ${sentence.split(' ').map((word, i) => `<span class="bh-word" onclick="handleBugHunter('${id}', ${i}, ${bugIdx}, '${escapeHTML(fix)}', this)" id="bh-word-${id}-${i}">${word}</span>`).join('')}
+                    </div>
+                    <button id="next-btn-${id}" class="btn-primary w-full mt-12 hidden py-5 px-12 mx-auto md:w-auto block text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>` }),
+
+            Slot: (id, prefix, options, suffix, correct) => ({ render: () => `
+                <div class="w-full max-w-5xl text-center relative z-10 animate-slide-up mx-auto">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-10"><i class="fa-solid fa-arrows-rotate mr-2 text-white text-lg"></i> Complete the sentence</h2>
+                    <div class="glass-panel p-10 md:p-16 text-3xl md:text-5xl font-serif font-bold flex items-center justify-center gap-x-4 gap-y-6 flex-wrap leading-relaxed shadow-2xl rounded-3xl bg-[#0a0a0a]">
+                        <span class="text-white">${prefix}</span>
+                        <button id="slot-btn-${id}" onclick="cycleSlot('${id}')" data-opts="${escapeHTML(options.join(','))}" data-index="0" data-current="${escapeHTML(options[0])}" class="bg-[#1DB954] text-white px-6 py-2 rounded-xl font-sans font-black uppercase tracking-wider hover:scale-105 transition-transform whitespace-nowrap leading-none shadow-[0_0_20px_rgba(29,185,84,0.4)] mx-2 border-none">
+                            ${options[0].toUpperCase()} <i class="fa-solid fa-caret-down text-sm opacity-60 ml-2 text-white"></i>
+                        </button>
+                        <span class="text-white">${suffix}</span>
+                    </div>
+                    <div class="mt-14 flex flex-col items-center">
+                        <button class="btn-outline px-14 py-5 w-full md:w-auto block text-lg shadow-lg bg-black/50 backdrop-blur" id="slot-verify-${id}" onclick="verifySlot('${id}', '${escapeHTML(correct)}')">CONFIRM SELECTION</button>
+                        <button id="next-btn-${id}" class="btn-primary w-full hidden mx-auto md:w-auto block mt-4 py-5 px-14 text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    </div>
+                </div>` }),
+
+            Builder: (id, words, target) => {
+                state.builderTarget = target;
+                return { render: () => `
+                <div class="w-full max-w-4xl relative z-10 animate-slide-up mx-auto">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-10 text-center"><i class="fa-solid fa-puzzle-piece mr-2 text-white text-lg"></i> Construct the sentence</h2>
+                    <div class="drop-zone glass-panel min-h-[140px] p-8 mb-10 flex flex-wrap gap-4 items-center justify-center border-dashed border-2 border-white/20 bg-black/40 transition-all duration-300 rounded-3xl shadow-inner" id="builder-drop-${id}"></div>
+                    <div class="flex flex-wrap gap-4 justify-center" id="builder-bank-${id}">
+                        ${words.map((w, i) => `<div class="word-chip text-lg md:text-xl font-sans" onclick="handleBuilderClick(this, '${id}')" data-word="${escapeHTML(w)}"><i class="fa-solid fa-grip-vertical text-white/20 mr-3 text-sm"></i>${w}</div>`).join('')}
+                    </div>
+                    <div class="mt-14 text-center">
+                        <button class="btn-outline px-14 py-5 w-full md:w-auto block text-lg shadow-lg bg-black/50 mx-auto hidden text-white" id="builder-verify-${id}" onclick="verifyBuilder('${id}')">VERIFY SYNTAX</button>
+                        <button id="next-btn-${id}" class="btn-primary w-full hidden mx-auto md:w-auto block py-5 px-14 text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                    </div>
+                </div>` };
+            },
+
+            Auth: (id, sentence, isValid) => ({ render: () => `
+                <div class="w-full max-w-3xl mx-auto text-center relative z-10 animate-slide-up">
+                    <h2 class="text-sm font-header text-spotify font-bold uppercase tracking-widest mb-10"><i class="fa-solid fa-shield-halved mr-2 text-white text-lg"></i> Is this correct?</h2>
+                    <div class="glass-panel p-12 text-4xl font-serif font-bold text-white mb-12 shadow-2xl bg-[#0a0a0a]" id="auth-card-${id}">
+                        "${sentence}"
+                    </div>
+                    <div class="grid grid-cols-2 gap-6" id="auth-opts-${id}">
+                        <button class="glass-panel py-8 text-2xl font-bold text-white hover:bg-spotify/10 hover:border-spotify hover:text-spotify transition-all border border-white/10 flex flex-col items-center gap-3 group" onclick="verifyAuth('${id}', true, ${isValid}, this)">
+                            <i class="fa-solid fa-check-circle text-4xl text-white/20 group-hover:text-white transition-colors"></i> YES
+                        </button>
+                        <button class="glass-panel py-8 text-2xl font-bold text-white hover:bg-error/10 hover:border-error hover:text-error transition-all border border-white/10 flex flex-col items-center gap-3 group" onclick="verifyAuth('${id}', false, ${isValid}, this)">
+                            <i class="fa-solid fa-times-circle text-4xl text-white/20 group-hover:text-error transition-colors"></i> NO
+                        </button>
+                    </div>
+                    <button id="next-btn-${id}" class="btn-primary w-full mt-12 hidden py-5 px-14 mx-auto md:w-auto block text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>` }),
+            
+            Slider: (id, title, l, r) => ({ render: () => `
+                <div class="w-full max-w-3xl text-center relative z-10 animate-slide-up mx-auto">
+                    <div class="w-24 h-24 rounded-full bg-spotify/10 mx-auto flex items-center justify-center mb-8 border border-spotify/30 shadow-[0_0_30px_rgba(29,185,84,0.15)]">
+                        <i class="fa-solid fa-scale-balanced text-4xl text-spotify"></i>
+                    </div>
+                    <h2 class="text-4xl font-header font-black text-white mb-6 tracking-tight">${title}</h2>
+                    <p class="text-white mb-16 text-xl">Drag to your preference</p>
+                    <div class="relative w-full h-16 flex items-center mb-10 px-4">
+                        <div class="absolute w-[calc(100%-2rem)] h-2 bg-[#333] rounded-full left-4 pointer-events-none"></div>
+                        <input type="range" min="0" max="100" value="50" class="absolute w-full h-2 z-10" onchange="gainXP(50, 'Opinion recorded'); document.getElementById('next-btn-${id}').classList.remove('hidden'); this.onchange=null;">
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-white px-4 uppercase tracking-widest">
+                        <span class="w-1/3 text-left">${l}</span>
+                        <span class="w-1/3 text-right">${r}</span>
+                    </div>
+                    <button id="next-btn-${id}" class="btn-primary w-full mt-12 hidden py-5 px-14 mx-auto md:w-auto block text-lg shadow-lg" onclick="nextSlide()">CONTINUE <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                </div>` })
+        };
+
+        /* --- VERIFICATION HANDLERS (NO TIMEOUTS, JUST CONTINUE BTNS) --- */
+        function verifyOptions(id, sel, corr, btnEl) {
+            const container = document.getElementById(`opts-${id}`);
+            container.querySelectorAll('.opt-circle').forEach(c => { c.innerHTML = ''; c.classList.remove('bg-spotify', 'border-spotify'); });
+            container.querySelectorAll('button').forEach(b => b.classList.remove('border-spotify', 'bg-[rgba(29,185,84,0.05)]'));
+
+            const circle = btnEl.querySelector('.opt-circle');
+
+            if (sel === corr) {
+                gainXP(100, 'Truth found!');
+                btnEl.classList.add('border-spotify', 'bg-[rgba(29,185,84,0.05)]');
+                circle.classList.add('bg-spotify', 'border-spotify');
+                circle.innerHTML = '<i class="fa-solid fa-check text-black text-sm"></i>';
+                
+                // Disable all buttons
+                container.querySelectorAll('button').forEach(b => b.onclick = null);
+                revealContinue(id);
+            } else {
+                takeDamage("Incorrect option.");
+                btnEl.classList.add('animate-error');
+                setTimeout(() => btnEl.classList.remove('animate-error'), 400);
+            }
+        }
+
+        function handleBugHunter(id, idx, bugIdx, fix, spanEl) {
+            if (idx === bugIdx) {
+                gainXP(80, "Mistake fixed!");
+                spanEl.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-sm mr-2"></i>${fix}`;
+                spanEl.classList.add('text-spotify', 'border-spotify');
+                spanEl.classList.remove('border-dashed', 'border-[#444]');
+                
+                document.getElementById(`bh-word-${id}-${idx}`).parentNode.querySelectorAll('span').forEach(s => s.onclick = null);
+                revealContinue(id);
+            } else {
+                takeDamage("This word is correct.");
+                spanEl.classList.add('text-error', 'border-error');
+                spanEl.classList.add('animate-error');
+                setTimeout(() => {
+                    spanEl.classList.remove('animate-error', 'text-error', 'border-error');
+                }, 1000);
+            }
+        }
+
+        function handleBuilderClick(el, id) {
+            const drop = document.getElementById(`builder-drop-${id}`);
+            const bank = document.getElementById(`builder-bank-${id}`);
+            if(el.parentElement.id === `builder-bank-${id}`) { drop.appendChild(el); el.classList.add('selected'); }
+            else { bank.appendChild(el); el.classList.remove('selected'); }
+            
+            const verifyBtn = document.getElementById(`builder-verify-${id}`);
+            if(drop.children.length > 0) {
+                verifyBtn.classList.remove('hidden');
+                verifyBtn.classList.add('animate-slide-up');
+            } else {
+                verifyBtn.classList.add('hidden');
+            }
+        }
+
+        function verifyBuilder(id) {
+            const drop = document.getElementById(`builder-drop-${id}`);
+            // Normalize inputs: remove punctuation and extra spaces, lowercase for safe checking
+            const sentence = Array.from(drop.children)
+                .map(c => c.getAttribute('data-word').replace(/[.?!,]/g, '').trim())
+                .join(' ').toLowerCase();
+            const target = state.builderTarget.replace(/[.?!,]/g, '').trim().toLowerCase();
+            
+            if(sentence === target) { 
+                gainXP(100, "Sentence built!"); 
+                drop.classList.add('border-spotify', 'bg-[rgba(29,185,84,0.1)]', 'border-solid');
+                drop.classList.remove('border-dashed', 'border-white/20', 'bg-black/40');
+                
+                const verifyBtn = document.getElementById(`builder-verify-${id}`);
+                if (verifyBtn) verifyBtn.classList.add('hidden');
+                Array.from(drop.children).forEach(c => c.onclick = null);
+                revealContinue(id);
+            } else { 
+                takeDamage("Incorrect order.");
+                drop.classList.add('animate-error');
+                setTimeout(() => drop.classList.remove('animate-error'), 400);
+            }
+        }
+
+        function cycleSlot(id) {
+            const btn = document.getElementById(`slot-btn-${id}`);
+            if(!btn) return;
+            const opts = btn.getAttribute('data-opts').split(',');
+            let idx = parseInt(btn.getAttribute('data-index'));
+            idx = (idx + 1) % opts.length;
+            btn.setAttribute('data-index', idx);
+            btn.innerHTML = `${opts[idx].toUpperCase()} <i class="fa-solid fa-caret-down text-sm opacity-60 ml-2 text-white"></i>`;
+            btn.setAttribute('data-current', opts[idx]);
+        }
+
+        function verifySlot(id, corr) { 
+            const btn = document.getElementById(`slot-btn-${id}`);
+            const currentVal = btn.getAttribute('data-current') || btn.getAttribute('data-opts').split(',')[0];
+            
+            if(currentVal.toLowerCase() === corr.toLowerCase()) { 
+                gainXP(100, "Perfect choice."); 
+                btn.classList.add('ring-4', 'ring-white/50');
+                btn.onclick = null; 
+                
+                const vBtn = document.getElementById(`slot-verify-${id}`);
+                if(vBtn) vBtn.classList.add('hidden');
+                
+                revealContinue(id);
+            } else { 
+                takeDamage("Incorrect option.");
+                btn.classList.add('animate-error', 'border-error', 'text-error', 'bg-error/10');
+                setTimeout(() => btn.classList.remove('animate-error', 'border-error', 'text-error', 'bg-error/10'), 600);
+            } 
+        }
+
+        function verifyAuth(id, playerChoice, actualValidity, btnEl) { 
+            const container = document.getElementById(`auth-opts-${id}`);
+            
+            if(playerChoice === actualValidity) { 
+                gainXP(100, "Fact verified."); 
+                
+                btnEl.classList.add('bg-spotify', 'text-white', 'border-spotify');
+                btnEl.classList.remove('text-white', 'border-white/10');
+                btnEl.querySelector('i').classList.remove('text-white/20');
+                btnEl.querySelector('i').classList.add('text-white');
+                
+                container.style.pointerEvents = 'none'; 
+                document.getElementById(`auth-card-${id}`).classList.add('border-spotify', 'text-spotify');
+                
+                revealContinue(id);
+            } else { 
+                takeDamage("Fact check failed.");
+                btnEl.classList.add('animate-error', 'border-error', 'text-error');
+                setTimeout(() => btnEl.classList.remove('animate-error', 'border-error', 'text-error'), 400);
+            } 
+        }
+
+        /* --- SLIDE DEFINITIONS --- */
+        const slides = [
+            { type: 'guide', render: () => Mechanics.Guide('A2 NODE 01: PAST SIMPLE', ['Context: Travel and Holidays', 'Grammar: Correct V2 forms', 'Speaking: Shared Memories']).render() },
+            { type: 'cover', render: () => Mechanics.Cover('MY LAST HOLIDAY', 'A journey through the Past Simple').render() },
+            
+            { type: 'speak', render: () => Mechanics.Speak('sp1', "How was your last weekend?", "Last weekend was...").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp2', "Where did you go on your last holiday?", "I went to...").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp3', "What did you eat for dinner yesterday?", "Yesterday, I ate...").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp4', "Did you travel anywhere last year?", "Yes, I traveled to... / No, I stayed...").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp5', "Did you enjoy your last trip?", "Yes, it was great because...").render() },
+            
+            { type: 'flash', render: () => Mechanics.Flashcards('fc1', 'Travel Verbs', 'Learn the irregular and regular past forms.', [
+                { icon: 'fa-arrow-right', word: 'Go', past: 'Went', meaning: 'Irregular Verb' },
+                { icon: 'fa-hotel', word: 'Stay', past: 'Stayed', meaning: 'Regular Verb (+ed)' },
+                { icon: 'fa-utensils', word: 'Eat', past: 'Ate', meaning: 'Irregular Verb' },
+                { icon: 'fa-landmark', word: 'Visit', past: 'Visited', meaning: 'Regular Verb (+ed)' }
+            ]).render() },
+
+            { type: 'pre-watch', render: () => Mechanics.PreWatch('pw1', 'Read before you watch', ['Where did she go?', 'Did she like the food?', 'How was the weather?']).render() },
+            
+            { type: 'video', render: () => Mechanics.Video('WATCH: MY LAST HOLIDAY', 'yHNOHXFbP78').render() },
+
+            { type: 'dossier', render: () => Mechanics.Dossier('TRIP TO FRANCE', `"I <b class="text-spotify font-sans">went</b> to France last year. I <b class="text-spotify font-sans">stayed</b> in a small hotel in Paris. I <b class="text-spotify font-sans">visited</b> the Eiffel Tower and <b class="text-spotify font-sans">ate</b> many croissants. I <b class="text-spotify font-sans">had</b> a great time!"`).render() },
+
+            { type: 'grammar', render: () => Mechanics.Grammar('fa-bolt', 'PAST SIMPLE', 'To talk about finished actions in the past.', [
+                { en: 'I visit<b class="text-spotify font-sans">ed</b> Paris.', desc: 'Regular (+ed)' },
+                { en: 'I <b class="text-spotify font-sans">went</b> to Paris.', desc: 'Irregular' }
+            ]).render() },
+
+            { type: 'grammar', render: () => Mechanics.Grammar('fa-table', 'COMMON IRREGULARS', 'These verbs change completely.', [
+                { en: 'Go <i class="fa-solid fa-arrow-right mx-4 text-spotify"></i> <b class="text-white">Went</b>', desc: 'Irregular' },
+                { en: 'Eat <i class="fa-solid fa-arrow-right mx-4 text-spotify"></i> <b class="text-white">Ate</b>', desc: 'Irregular' },
+                { en: 'See <i class="fa-solid fa-arrow-right mx-4 text-spotify"></i> <b class="text-white">Saw</b>', desc: 'Irregular' }
+            ]).render() },
+
+            { type: 'mechanic', render: () => Mechanics.Options('g1', "Where did she stay?", ["In a big villa", "In a small hotel", "In a tent"], 'In a small hotel').render() },
+            { type: 'mechanic', render: () => Mechanics.BugHunter('g2', "I went to France and see the tower", 5, "saw").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp6', "What is the most beautiful city you know?", "The most beautiful city I know is...").render() },
+            
+            { type: 'mechanic', render: () => Mechanics.Slot('g3', "She", ["stayed", "stay", "staying"], "in Paris.", "stayed").render() },
+            { type: 'mechanic', render: () => Mechanics.Builder('g4', ["photos.", "many", "She", "took"], "She took many photos.").render() },
+            { type: 'mechanic', render: () => Mechanics.Auth('g5', "She went to France with her friends.", false).render() },
+            
+            { type: 'mechanic', render: () => Mechanics.Options('g6', "What did she eat?", ["Pizza", "Croissants", "Burgers"], 'Croissants').render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp8', "What is your favorite food when you travel?", "When I travel, I love eating...").render() },
+            
+            { type: 'mechanic', render: () => Mechanics.BugHunter('g7', "We didn't went to the museum", 2, "go").render() },
+            { type: 'mechanic', render: () => Mechanics.Slot('g8', "The weather", ["is", "was", "were"], "perfect.", "was").render() },
+            { type: 'mechanic', render: () => Mechanics.Builder('g9', ["a", "time.", "had", "great", "We"], "We had a great time.").render() },
+            
+            { type: 'speak', render: () => Mechanics.Speak('sp10', "Tell me 3 things you did yesterday.", "Yesterday, I [v2], [v2] and [v2].").render() },
+            
+            { type: 'mechanic', render: () => Mechanics.Options('g11', "How long was the trip?", ["One week", "One month", "Three days"], 'One week').render() },
+            { type: 'mechanic', render: () => Mechanics.BugHunter('g12', "Did you saw the Eiffel Tower?", 2, "see").render() },
+            { type: 'mechanic', render: () => Mechanics.Auth('g15', "She traveled by plane.", true).render() },
+            
+            { type: 'slider', render: () => Mechanics.Slider('s1', "Travel Style", "Luxury", "Budget").render() },
+            { type: 'slider', render: () => Mechanics.Slider('s2', "Planning", "Spontaneous", "Organized").render() },
+            { type: 'slider', render: () => Mechanics.Slider('s3', "Food", "Local Food", "Fast Food").render() },
+            
+            { type: 'speak', render: () => Mechanics.Speak('sp13', "You meet a friend. They ask about your last trip.", "I went to [Place] last year and it was [Adjective].").render() },
+            { type: 'speak', render: () => Mechanics.Speak('sp14', "Tell me about one thing you DID NOT do last holiday.", "I didn't visit any museums, but I went to the beach.").render() },
+            
+            { type: 'clear', render: () => `
+                <div class="text-center animate-slide-up w-full max-w-2xl mx-auto">
+                    <div class="w-40 h-40 bg-[rgba(29,185,84,0.1)] rounded-full flex items-center justify-center mx-auto mb-10 relative shadow-[0_0_50px_rgba(29,185,84,0.3)]">
+                        <div class="absolute inset-0 rounded-full border-4 border-spotify/50 animate-ping"></div>
+                        <i class="fa-solid fa-check text-7xl text-white"></i>
+                    </div>
+                    <h1 class="text-6xl font-header font-black mb-6 uppercase tracking-tighter text-white">MISSION CLEAR</h1>
+                    <p class="text-2xl text-subtext mb-12">Past Memories successfully synced.</p>
+                    <div class="glass-panel p-10 text-left border-t-4 border-spotify shadow-2xl bg-[#0a0a0a]">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-6 mb-6">
+                            <span class="text-xl font-bold text-white">Total Fluency (XP)</span>
+                            <span class="text-4xl text-spotify font-black font-header">${state.xp}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold text-white">Mastery Focus</span>
+                            <span class="text-3xl text-white font-black font-header">100%</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary px-14 py-6 mt-14 text-xl shadow-[0_10px_30px_rgba(29,185,84,0.4)] text-white border-none" onclick="location.reload()">RESTART NODE <i class="fa-solid fa-rotate-right ml-2"></i></button>
+                </div>` 
+            }
+        ];
+
+        window.onload = () => { renderSlide(); updateHUD(); };
+    </script>
+</body>
+</html>
